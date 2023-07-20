@@ -9,16 +9,12 @@ import Foundation
 
 struct BankDepartment {
     private let responsibility: BankingService
-    private let numberOfBankTeller: Int
-    private let departmentQueue: DispatchQueue = DispatchQueue(label: "departmentQueue", attributes: .concurrent)
-    private let semaphore: DispatchSemaphore
-    private let group: DispatchGroup
+    private let departmentQueue: OperationQueue
     
-    init(responsibility: BankingService, numberOfBankTeller: Int, group: DispatchGroup) {
+    init(responsibility: BankingService, numberOfBankTeller: Int, queue: OperationQueue) {
         self.responsibility = responsibility
-        self.numberOfBankTeller = numberOfBankTeller
-        self.semaphore = DispatchSemaphore(value: numberOfBankTeller)
-        self.group = group
+        self.departmentQueue = queue
+        self.departmentQueue.maxConcurrentOperationCount = numberOfBankTeller
     }
     
     private func work() {
@@ -28,12 +24,11 @@ struct BankDepartment {
     func takeOnTask(for customer: Customer,
                     startHandler: @escaping (Customer) -> Void = { _ in },
                     completionHandler: @escaping (Customer) -> Void = { _ in }) {
-        departmentQueue.async(group: group) {
-            semaphore.wait()
+        let task = BlockOperation {
             startHandler(customer)
             work()
             completionHandler(customer)
-            semaphore.signal()
         }
+        departmentQueue.addOperation(task)
     }
 }

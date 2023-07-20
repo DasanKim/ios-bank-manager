@@ -38,9 +38,11 @@ struct Bank: Openable {
     }
     
     mutating private func startBusiness() {
-        let group = DispatchGroup()
-        let depositDepartment = BankDepartment(responsibility: .deposit, numberOfBankTeller: 2, group: group)
-        let loanBankDepartment = BankDepartment(responsibility: .loan, numberOfBankTeller: 1, group: group)
+        let depositQueue = OperationQueue()
+        let loanQueue = OperationQueue()
+        let depositDepartment = BankDepartment(responsibility: .deposit, numberOfBankTeller: 2, queue: depositQueue)
+        let loanBankDepartment = BankDepartment(responsibility: .loan, numberOfBankTeller: 1, queue: loanQueue)
+        
         timer.startTime = CFAbsoluteTimeGetCurrent()
         
         while let currentCustomer = customerQueue.dequeue() {
@@ -55,7 +57,9 @@ struct Bank: Openable {
                                               completionHandler: printFinishMessage)
             }
         }
-        group.wait()
+        depositQueue.waitUntilAllOperationsAreFinished()
+        loanQueue.waitUntilAllOperationsAreFinished()
+        
         timer.endTime = CFAbsoluteTimeGetCurrent()
     }
     
