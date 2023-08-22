@@ -6,13 +6,31 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
+    private let progressView = ProgressView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        configureUI()
+        setupConstraints()
     }
-
-
+    
+    func configureUI() {
+        view.backgroundColor = .systemBackground
+        view.addSubview(progressView)
+    }
+    
+    func setupConstraints() {
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            progressView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            progressView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            progressView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+        ])
+        
+    }
 }
 
