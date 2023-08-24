@@ -31,6 +31,7 @@ final class ProgressView: UIView {
         label.textColor = .black
         label.text = "업무시간"
         label.textAlignment = .center
+        label.setContentHuggingPriority(.required, for: .vertical)
         
         return label
     }()
@@ -45,23 +46,18 @@ final class ProgressView: UIView {
         return stackView
     }()
     
-    private let listStackView: UIStackView = {
+    private let titleStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .horizontal
-        stackView.alignment = .center
+        stackView.alignment = .fill
         stackView.distribution = .fillEqually
+        stackView.setContentHuggingPriority(.required, for: .vertical)
         
         return stackView
     }()
     
-    private let waitingStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.distribution = .fillProportionally
-        
+    private let waitingLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.text = "대기중"
         titleLabel.textAlignment = .center
@@ -69,20 +65,10 @@ final class ProgressView: UIView {
         titleLabel.backgroundColor = .green
         titleLabel.font = UIFont.preferredFont(forTextStyle: .title1)
         
-        stackView.addArrangedSubview(titleLabel)
-        
-        titleLabel.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        
-        return stackView
+        return titleLabel
     }()
     
-    private let workingStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.distribution = .fillProportionally
-        
+    private let workingLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.text = "업무중"
         titleLabel.textAlignment = .center
@@ -90,11 +76,15 @@ final class ProgressView: UIView {
         titleLabel.backgroundColor = .systemBlue
         titleLabel.font = UIFont.preferredFont(forTextStyle: .title1)
         
-        stackView.addArrangedSubview(titleLabel)
+        return titleLabel
+    }()
+    
+    private let waitingCustomerListScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.setContentHuggingPriority(.init(50), for: .vertical)
         
-        titleLabel.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        
-        return stackView
+        return scrollView
     }()
     
     private let waitingCustomerListStackView: UIStackView = {
@@ -102,8 +92,8 @@ final class ProgressView: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.alignment = .center
-        stackView.distribution = .fillEqually
-        stackView.spacing = 8
+        stackView.distribution = .fill
+//        stackView.setContentHuggingPriority(.init(51), for: .vertical)
         
         return stackView
     }()
@@ -113,8 +103,8 @@ final class ProgressView: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.alignment = .center
-        stackView.distribution = .fillEqually
-        stackView.spacing = 8
+        stackView.distribution = .fill
+        stackView.setContentHuggingPriority(.init(50), for: .vertical)
         
         return stackView
     }()
@@ -169,20 +159,23 @@ final class ProgressView: UIView {
     private func configureUI() {
         buttonStackView.addArrangedSubview(addCustomerButton)
         buttonStackView.addArrangedSubview(resetButton)
-        waitingStackView.addArrangedSubview(waitingCustomerListStackView)
-        workingStackView.addArrangedSubview(workingCustomerListStackView)
-        listStackView.addArrangedSubview(waitingStackView)
-        listStackView.addArrangedSubview(workingStackView)
+        titleStackView.addArrangedSubview(waitingLabel)
+        titleStackView.addArrangedSubview(workingLabel)
+        waitingCustomerListScrollView.addSubview(waitingCustomerListStackView)
         
         addSubview(buttonStackView)
         addSubview(workTimeLabel)
-        addSubview(listStackView)
+        addSubview(titleStackView)
+        addSubview(waitingCustomerListScrollView)
+        addSubview(workingCustomerListStackView)
     }
     
     private func setupConstraints() {
         setupButtonStackViewConstraints()
         setupWorkTimeLabelConstraints()
-        setupListStackViewConstraints()
+        setupTitleStackViewConstraints()
+        setupWaitingCustomerListScrollViewConstraints()
+        setupWorkingCustomerListStackViewConstraints()
     }
     
     private func setupButtonStackViewConstraints() {
@@ -190,6 +183,7 @@ final class ProgressView: UIView {
             buttonStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 5),
             buttonStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 0),
             buttonStackView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: 0),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
     
@@ -201,13 +195,40 @@ final class ProgressView: UIView {
         ])
     }
     
-    private func setupListStackViewConstraints() {
+    private func setupTitleStackViewConstraints() {
         NSLayoutConstraint.activate([
-            listStackView.topAnchor.constraint(equalTo: workTimeLabel.bottomAnchor, constant: 20),
-            listStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 0),
-            listStackView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: 0),
+            waitingLabel.widthAnchor.constraint(equalTo: workingLabel.widthAnchor),
+            titleStackView.topAnchor.constraint(equalTo: workTimeLabel.bottomAnchor, constant: 20),
+            titleStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 0),
+            titleStackView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: 0),
+        ])
+    }
+    
+    private func setupWaitingCustomerListScrollViewConstraints() {
+        let stackViewHeightConstraint = waitingCustomerListStackView.heightAnchor.constraint(equalTo: waitingCustomerListScrollView.frameLayoutGuide.heightAnchor)
+        stackViewHeightConstraint.priority = .defaultLow
+        
+        NSLayoutConstraint.activate([
+            waitingCustomerListScrollView.topAnchor.constraint(equalTo: titleStackView.bottomAnchor, constant: 0),
+            waitingCustomerListScrollView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            waitingCustomerListScrollView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 0),
+            waitingCustomerListScrollView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.5),
+            waitingCustomerListScrollView.trailingAnchor.constraint(equalTo: workingCustomerListStackView.leadingAnchor, constant: 0),
+            
+            waitingCustomerListStackView.topAnchor.constraint(equalTo: waitingCustomerListScrollView.topAnchor, constant: 0),
+            waitingCustomerListStackView.bottomAnchor.constraint(equalTo: waitingCustomerListScrollView.bottomAnchor),
+            waitingCustomerListStackView.leadingAnchor.constraint(equalTo: waitingCustomerListScrollView.leadingAnchor, constant: 0),
+            waitingCustomerListStackView.trailingAnchor.constraint(equalTo: waitingCustomerListScrollView.trailingAnchor, constant: 0),
+            waitingCustomerListStackView.widthAnchor.constraint(equalTo: waitingCustomerListScrollView.widthAnchor),
+            stackViewHeightConstraint
+        ])
+    }
+    
+    private func setupWorkingCustomerListStackViewConstraints() {
+        NSLayoutConstraint.activate([
+            workingCustomerListStackView.topAnchor.constraint(equalTo: titleStackView.bottomAnchor, constant: 0),
+            workingCustomerListStackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            workingCustomerListStackView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.5),
         ])
     }
 }
-
-// 메서드 분리
