@@ -8,7 +8,7 @@
 import UIKit
 
 final class ProgressView: UIView {
-    private let addCustomerButton: UIButton = {
+    let addCustomerButton: UIButton = {
         let button = UIButton()
         button.setTitleColor(.systemBlue, for: .normal)
         button.setTitle("고객 10명 추가", for: .normal)
@@ -16,7 +16,7 @@ final class ProgressView: UIView {
         return button
     }()
     
-    private let resetButton: UIButton = {
+    let resetButton: UIButton = {
         let button = UIButton()
         button.setTitleColor(.systemRed, for: .normal)
         button.setTitle("초기화", for: .normal)
@@ -152,6 +152,7 @@ final class ProgressView: UIView {
         waitingCustomerListStackView.subviews.forEach { subview in
             if subview.tag == customer.numberTicket {
                 subview.removeFromSuperview()
+                return
             }
         }
     }
@@ -160,6 +161,7 @@ final class ProgressView: UIView {
         workingCustomerListStackView.subviews.forEach { subview in
             if subview.tag == customer.numberTicket {
                 subview.removeFromSuperview()
+                return
             }
         }
     }

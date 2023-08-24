@@ -8,7 +8,11 @@
 import Foundation
 
 struct BankDepartment {
-    private let departmentQueue: DispatchQueue = DispatchQueue(label: "departmentQueue", attributes: .concurrent)
+    private let departmentQueue: DispatchQueue = DispatchQueue(
+        label: "departmentQueue",
+        qos: .background,
+        attributes: .concurrent
+    )
     private let semaphore: DispatchSemaphore
     private let group: DispatchGroup
     

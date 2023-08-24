@@ -7,56 +7,51 @@
 
 import Foundation
 
-struct Bank: Openable {
+final class Bank {
     private var customerQueue: Queue<Customer> = Queue()
-    private var numberOfCustomer: Int = 0
     private var timeTracker = TimeTracker()
+    private var customerCount: Int = 0
+    private let group = DispatchGroup()
+    private let depositDepartment: BankDepartment
+    private let loanBankDepartment: BankDepartment
     
-    private let printStartMessage: (Customer) -> Void = { customer in
-        print(String(format: MessageFormat.startTask, customer.numberTicket, customer.service.description))
+    init() {
+        depositDepartment = BankDepartment(numberOfBankTeller: 2, group: group)
+        loanBankDepartment = BankDepartment(numberOfBankTeller: 1, group: group)
     }
-    
-    private let printFinishMessage: (Customer) -> Void = { customer in
-        print(String(format: MessageFormat.finishTask, customer.numberTicket, customer.service.description))
-    }
-    
-    mutating func open(numberOfCustomer: Int) {
-        self.numberOfCustomer = numberOfCustomer
-        handOutNumberTickets()
-        startBusiness()
-        closeBusiness()
-    }
-        
-    mutating private func handOutNumberTickets() {
-        (0..<numberOfCustomer).forEach {
-            customerQueue.enqueue(Customer(numberTicket: $0 + 1))
+
+    func handOutNumberTickets(numberOfCustomer: Int) -> [Customer] {
+        var customers: [Customer] = []
+        for _ in 0..<numberOfCustomer {
+            customerCount += 1
+            let customer = Customer(numberTicket: customerCount)
+            customerQueue.enqueue(customer)
+            customers.append(customer)
         }
+
+        return customers
     }
     
-    mutating private func startBusiness() {
-        let group = DispatchGroup()
-        let depositDepartment = BankDepartment(numberOfBankTeller: 2, group: group)
-        let loanBankDepartment = BankDepartment(numberOfBankTeller: 1, group: group)
-        timeTracker.startTime = CFAbsoluteTimeGetCurrent()
-        
+    func startBusiness(startHandler: @escaping (Customer) -> Void,
+                                        completionHandler: @escaping (Customer) -> Void) {
         while let currentCustomer = customerQueue.dequeue() {
             switch currentCustomer.service {
             case .deposit:
                 depositDepartment.takeOnTask(for: currentCustomer,
-                                             startHandler: printStartMessage,
-                                             completionHandler: printFinishMessage)
+                                             startHandler: startHandler,
+                                             completionHandler: completionHandler)
             case .loan:
                 loanBankDepartment.takeOnTask(for: currentCustomer,
-                                              startHandler: printStartMessage,
-                                              completionHandler: printFinishMessage)
+                                              startHandler: startHandler,
+                                              completionHandler: completionHandler)
             }
         }
-        group.wait()
-        timeTracker.endTime = CFAbsoluteTimeGetCurrent()
     }
     
-    private func closeBusiness() {
-        print(String(format: MessageFormat.closing, numberOfCustomer, timeTracker.duration))
+    private func stopBusiness() {
+        group.notify(queue: .main) {
+            //타이머 멈춰
+        }
     }
 }
 
