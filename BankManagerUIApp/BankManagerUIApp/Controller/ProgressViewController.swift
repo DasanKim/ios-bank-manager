@@ -41,7 +41,7 @@ final class ProgressViewController: UIViewController {
     }
     
     func setupConstraints() {
-        progressView.translatesAutoresizingMaskIntoConstraints = false
+        //progressView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),

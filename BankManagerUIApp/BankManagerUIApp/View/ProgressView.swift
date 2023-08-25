@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ProgressView: UIView {
+final class ProgressView: UIStackView {
     let addCustomerButton: UIButton = {
         let button = UIButton()
         button.setTitleColor(.systemBlue, for: .normal)
@@ -52,7 +52,7 @@ final class ProgressView: UIView {
         stackView.axis = .horizontal
         stackView.alignment = .fill
         stackView.distribution = .fillEqually
-        stackView.setContentHuggingPriority(.required, for: .vertical)
+        //stackView.setContentHuggingPriority(.required, for: .vertical)
         
         return stackView
     }()
@@ -115,7 +115,7 @@ final class ProgressView: UIView {
         setupConstraints()
     }
     
-    required init?(coder: NSCoder) {
+    required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
@@ -126,6 +126,7 @@ final class ProgressView: UIView {
             label.text = "\(customer.numberTicket) - \(customer.service)"
             label.font = UIFont.preferredFont(forTextStyle: .title3)
             label.tag = customer.numberTicket
+            
             waitingCustomerListStackView.addArrangedSubview(label)
         }
     }
@@ -135,6 +136,8 @@ final class ProgressView: UIView {
         label.textColor = customer.service == .loan ? .purple : .black
         label.text = "\(customer.numberTicket) - \(customer.service)"
         label.font = UIFont.preferredFont(forTextStyle: .title3)
+        label.tag = customer.numberTicket
+        //label.setContentHuggingPriority(.init(900), for: .vertical)
         workingCustomerListStackView.addArrangedSubview(label)
     }
     
@@ -157,6 +160,11 @@ final class ProgressView: UIView {
     }
     
     private func configureUI() {
+        translatesAutoresizingMaskIntoConstraints = false
+        axis = .vertical
+        alignment = .top
+        distribution = .fill
+        
         buttonStackView.addArrangedSubview(addCustomerButton)
         buttonStackView.addArrangedSubview(resetButton)
         titleStackView.addArrangedSubview(waitingLabel)
