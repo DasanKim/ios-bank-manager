@@ -24,6 +24,16 @@ final class ProgressView: UIStackView {
         return button
     }()
     
+    private let buttonStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.distribution = .fillEqually
+        
+        return stackView
+    }()
+    
     private let workTimeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -35,28 +45,7 @@ final class ProgressView: UIStackView {
         
         return label
     }()
-    
-    private let buttonStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.alignment = .center
-        stackView.distribution = .fillEqually
-        
-        return stackView
-    }()
-    
-    private let titleStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fillEqually
-        //stackView.setContentHuggingPriority(.required, for: .vertical)
-        
-        return stackView
-    }()
-    
+
     private let waitingLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.text = "대기중"
@@ -79,10 +68,19 @@ final class ProgressView: UIStackView {
         return titleLabel
     }()
     
+    private let titleStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fillEqually
+        
+        return stackView
+    }()
+    
     private let waitingCustomerListScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.setContentHuggingPriority(.init(50), for: .vertical)
         
         return scrollView
     }()
@@ -93,7 +91,6 @@ final class ProgressView: UIStackView {
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.distribution = .fill
-//        stackView.setContentHuggingPriority(.init(51), for: .vertical)
         
         return stackView
     }()
@@ -104,7 +101,16 @@ final class ProgressView: UIStackView {
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.distribution = .fill
-        stackView.setContentHuggingPriority(.init(50), for: .vertical)
+        
+        return stackView
+    }()
+    
+    private let customerListStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.alignment = .top
+        stackView.distribution = .fill
         
         return stackView
     }()
@@ -137,7 +143,7 @@ final class ProgressView: UIStackView {
         label.text = "\(customer.numberTicket) - \(customer.service)"
         label.font = UIFont.preferredFont(forTextStyle: .title3)
         label.tag = customer.numberTicket
-        //label.setContentHuggingPriority(.init(900), for: .vertical)
+
         workingCustomerListStackView.addArrangedSubview(label)
     }
     
@@ -162,7 +168,7 @@ final class ProgressView: UIStackView {
     private func configureUI() {
         translatesAutoresizingMaskIntoConstraints = false
         axis = .vertical
-        alignment = .top
+        alignment = .fill
         distribution = .fill
         
         buttonStackView.addArrangedSubview(addCustomerButton)
@@ -170,20 +176,21 @@ final class ProgressView: UIStackView {
         titleStackView.addArrangedSubview(waitingLabel)
         titleStackView.addArrangedSubview(workingLabel)
         waitingCustomerListScrollView.addSubview(waitingCustomerListStackView)
+        customerListStackView.addArrangedSubview(waitingCustomerListScrollView)
+        customerListStackView.addArrangedSubview(workingCustomerListStackView)
         
         addSubview(buttonStackView)
         addSubview(workTimeLabel)
         addSubview(titleStackView)
-        addSubview(waitingCustomerListScrollView)
-        addSubview(workingCustomerListStackView)
+        addSubview(customerListStackView)
     }
     
     private func setupConstraints() {
         setupButtonStackViewConstraints()
         setupWorkTimeLabelConstraints()
         setupTitleStackViewConstraints()
+        setupCustomerListStackViewConstraints()
         setupWaitingCustomerListScrollViewConstraints()
-        setupWorkingCustomerListStackViewConstraints()
     }
     
     private func setupButtonStackViewConstraints() {
@@ -217,12 +224,8 @@ final class ProgressView: UIStackView {
         stackViewHeightConstraint.priority = .defaultLow
         
         NSLayoutConstraint.activate([
-            waitingCustomerListScrollView.topAnchor.constraint(equalTo: titleStackView.bottomAnchor, constant: 0),
-            waitingCustomerListScrollView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-            waitingCustomerListScrollView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 0),
-            waitingCustomerListScrollView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.5),
-            waitingCustomerListScrollView.trailingAnchor.constraint(equalTo: workingCustomerListStackView.leadingAnchor, constant: 0),
-            
+            waitingCustomerListScrollView.widthAnchor.constraint(equalTo: customerListStackView.widthAnchor, multiplier: 0.5),
+           
             waitingCustomerListStackView.topAnchor.constraint(equalTo: waitingCustomerListScrollView.topAnchor, constant: 0),
             waitingCustomerListStackView.bottomAnchor.constraint(equalTo: waitingCustomerListScrollView.bottomAnchor),
             waitingCustomerListStackView.leadingAnchor.constraint(equalTo: waitingCustomerListScrollView.leadingAnchor, constant: 0),
@@ -232,11 +235,12 @@ final class ProgressView: UIStackView {
         ])
     }
     
-    private func setupWorkingCustomerListStackViewConstraints() {
+    private func setupCustomerListStackViewConstraints() {
         NSLayoutConstraint.activate([
-            workingCustomerListStackView.topAnchor.constraint(equalTo: titleStackView.bottomAnchor, constant: 0),
-            workingCustomerListStackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-            workingCustomerListStackView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.5),
+            customerListStackView.topAnchor.constraint(equalTo: titleStackView.bottomAnchor, constant: 5),
+            customerListStackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            customerListStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            customerListStackView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
         ])
     }
 }
